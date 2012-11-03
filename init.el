@@ -238,5 +238,4 @@
 (require 'tramp)
 (setq tramp-default-method "ssh")
 (add-to-list 'tramp-default-proxies-alist '("\\'" "\\`root\\'" "/ssh:%h:")) ;; 追加
-;;(add-to-list 'tramp-default-proxies-alist '("Nishiazabu.local\\'" "\\`root\\'" nil)) ;; 追加
 (add-to-list 'tramp-default-proxies-alist '("localhost\\'" "\\`root\\'" nil)) ;; 追加
