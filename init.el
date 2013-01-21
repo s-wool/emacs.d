@@ -240,3 +240,14 @@
 (setq tramp-default-method "ssh")
 (add-to-list 'tramp-default-proxies-alist '("\\'" "\\`root\\'" "/ssh:%h:")) ;; 追加
 (add-to-list 'tramp-default-proxies-alist '("localhost\\'" "\\`root\\'" nil)) ;; 追加
+
+;; perl
+(load-library "cperl-mode")
+(add-to-list 'auto-mode-alist '("\\.[Pp][LlMm][Cc]?$" . cperl-mode))
+(while (let ((orig (rassoc 'perl-mode auto-mode-alist)))
+	 (if orig (setcdr orig 'cperl-mode))))
+(while (let ((orig (rassoc 'perl-mode interpreter-mode-alist)))
+	 (if orig (setcdr orig 'cperl-mode))))
+(dolist (interpreter '("perl" "perl5" "miniperl" "pugs"))
+  (unless (assoc interpreter interpreter-mode-alist)
+    (add-to-list 'interpreter-mode-alist (cons interpreter 'cperl-mode))))
