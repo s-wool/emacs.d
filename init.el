@@ -80,7 +80,7 @@
 (require 'minibuf-isearch nil t)
 
 ;; Mac用
-(when (eq system-type 'darwin)
+(when (and (eq system-type 'darwin) (eq window-system 'ns))
   ;; MacのEmacsでファイル名を正しく扱うための設定
   (require 'ucs-normalize)
   (setq file-name-coding-system 'utf-8-hfs)
@@ -153,8 +153,6 @@
 				      'smarty-mode))))
   (when (boundp 'jaspace-alternate-jaspace-string)
     (setq jaspace-alternate-jaspace-string "□"))
-  (when (boundp 'jaspace-alternate-eol-string)
-    (setq jaspace-alternate-eol-string "↓\n"))
   (when (boundp 'jaspace-highlight-tabs)
     (setq jaspace-highlight-tabs ?^))
   (add-hook 'jaspace-mode-off-hook
@@ -193,7 +191,8 @@
 
 ;; redo+.el
 (when (require 'redo+ nil t)
-  (global-set-key (kbd "C-'") 'redo))
+  (global-set-key (kbd "C-c '") 'redo))
+(setq undo-no-redo t)
 
 ;; php-mode
 (require 'php-mode)
@@ -220,7 +219,7 @@
             (setq c-basic-offset 4)))
 
 ;; howm
-(setq howm-directory "~/Dropbox/share/howm/")
+(setq howm-directory "~/Dropbox/Application Data/howm/")
 ;(setq howm-file-name-format "%Y/%m/%Y-%m-%d.howm")
 (setq howm-menu-lang 'ja)
 (setq howm-process-coding-system 'utf-8)
@@ -243,7 +242,7 @@
 
 ;; perl
 (load-library "cperl-mode")
-(add-to-list 'auto-mode-alist '("\\.[Pp][LlMm][Cc]?$" . cperl-mode))
+(add-to-list 'auto-mode-alist '("\\.[Pp][LlMms][Ccg]?[i]?$" . cperl-mode))
 (while (let ((orig (rassoc 'perl-mode auto-mode-alist)))
 	 (if orig (setcdr orig 'cperl-mode))))
 (while (let ((orig (rassoc 'perl-mode interpreter-mode-alist)))
@@ -251,3 +250,8 @@
 (dolist (interpreter '("perl" "perl5" "miniperl" "pugs"))
   (unless (assoc interpreter interpreter-mode-alist)
     (add-to-list 'interpreter-mode-alist (cons interpreter 'cperl-mode))))
+(add-hook 'cperl-mode-hook
+          '(lambda ()
+	     (setq tab-width 4)
+	     (setq c-basic-offset 4)
+	     (setq indent-tabs-mode nil))) 
