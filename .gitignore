@@ -1,6 +1,8 @@
 abbrev_defs
 ac-comphist.dat
+auto-save-list/*
 auto-save-list/**/*
 history
 tramp
 *.elc
+url/cookies
