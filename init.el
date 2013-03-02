@@ -78,13 +78,16 @@
 (setq history-length t)
 ;;minibufでisearchを使えるようにする
 (require 'minibuf-isearch nil t)
+;; use space
+(setq-default indent-tabs-mode nil) 
 
-;; Mac用
+;; MacのEmacsでファイル名を正しく扱うための設定
+(require 'ucs-normalize)
+(setq file-name-coding-system 'utf-8-hfs)
+(setq locale-coding-system 'utf-8-hfs)
+
+;; Mac用(App版)
 (when (and (eq system-type 'darwin) (eq window-system 'ns))
-  ;; MacのEmacsでファイル名を正しく扱うための設定
-  (require 'ucs-normalize)
-  (setq file-name-coding-system 'utf-8-hfs)
-  (setq locale-coding-system 'utf-8-hfs)
   ;; 日本語入力
   (setq default-input-method "MacOSX")
   ;; フォント
@@ -95,6 +98,34 @@
 		    nil
 		    'append)
   (add-to-list 'default-frame-alist '(font . "fontset-dejavukakugo")))
+
+;; Mac Clipboard との共有
+(defvar prev-yanked-text nil "*previous yanked text")
+
+(setq interprogram-cut-function
+      (lambda (text &optional push)
+        ; use pipe
+        (let ((process-connection-type nil))
+          (let ((proc (start-process "pbcopy" nil "pbcopy")))
+            (process-send-string proc string)
+            (process-send-eof proc)
+            ))))
+
+(setq interprogram-paste-function
+      (lambda ()
+        (let ((text (shell-command-to-string "pbpaste")))
+          (if (string= prev-yanked-text text)
+              nil
+            (setq prev-yanked-text text)))))
+
+;; dash
+(when (eq system-type 'darwin)
+  (defun dash ()
+    (interactive)
+    (shell-command
+     (format "open dash://%s"
+	     (or (thing-at-point 'symbol) ""))))
+  (global-set-key "\C-cd" 'dash))
 
 ;; anything
 (require 'anything-startup)
@@ -135,7 +166,7 @@
     (split-window-horizontally))
   (other-window 1))
 
-(global-set-key (kbd "C-t") 'other-window-or-split)
+(global-set-key (kbd "C-]") 'other-window-or-split)
 
 ;; goto-line
 (global-set-key "\C-l" 'goto-line)
@@ -243,6 +274,7 @@
 ;; perl
 (load-library "cperl-mode")
 (add-to-list 'auto-mode-alist '("\\.[Pp][LlMms][Ccg]?[i]?$" . cperl-mode))
+(add-to-list 'auto-mode-alist '("\\.t$" . cperl-mode))
 (while (let ((orig (rassoc 'perl-mode auto-mode-alist)))
 	 (if orig (setcdr orig 'cperl-mode))))
 (while (let ((orig (rassoc 'perl-mode interpreter-mode-alist)))
@@ -252,6 +284,16 @@
     (add-to-list 'interpreter-mode-alist (cons interpreter 'cperl-mode))))
 (add-hook 'cperl-mode-hook
           '(lambda ()
-	     (setq tab-width 4)
-	     (setq c-basic-offset 4)
-	     (setq indent-tabs-mode nil))) 
+                  (cperl-set-style "PerlStyle"))) 
+
+;; twittering-mode
+(require 'twittering-mode)
+
+;; dash
+(when (eq system-type 'darwin)
+  (autoload 'dash-at-point "dash-at-point"
+    "Search the word at point with Dash." t nil)
+  (global-set-key "\C-cd" 'dash-at-point))
+
+;; ag
+(require 'ag)
