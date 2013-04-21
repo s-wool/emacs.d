@@ -99,24 +99,25 @@
 		    'append)
   (add-to-list 'default-frame-alist '(font . "fontset-dejavukakugo")))
 
-;; Mac Clipboard との共有
-(defvar prev-yanked-text nil "*previous yanked text")
-
-(setq interprogram-cut-function
-      (lambda (text &optional push)
-        ; use pipe
-        (let ((process-connection-type nil))
-          (let ((proc (start-process "pbcopy" nil "pbcopy")))
-            (process-send-string proc string)
-            (process-send-eof proc)
-            ))))
-
-(setq interprogram-paste-function
-      (lambda ()
-        (let ((text (shell-command-to-string "pbpaste")))
-          (if (string= prev-yanked-text text)
-              nil
-            (setq prev-yanked-text text)))))
+;; Mac Clipboardとの共有
+(when (eq system-type 'darwin)
+  (defvar prev-yanked-text nil "*previous yanked text")
+  (setq interprogram-cut-function
+        (lambda (text &optional push)
+                                        ; use pipe
+          (with-temp-buffer (cd "/tmp")
+                            (let ((process-connection-type nil))
+                              (let ((proc (start-process "pbcopy" nil "pbcopy")))
+                                (process-send-string proc string)
+                                (process-send-eof proc)
+                                )))))
+  (setq interprogram-paste-function
+        (lambda ()
+          (with-temp-buffer (cd "/tmp")
+                            (let ((text (shell-command-to-string "pbpaste")))
+                              (if (string= prev-yanked-text text)
+                                  nil
+                                (setq prev-yanked-text text)))))))
 
 ;; dash
 (when (eq system-type 'darwin)
