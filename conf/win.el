@@ -11,7 +11,17 @@
 (add-hook 'input-method-inactivate-hook
     (lambda() (set-cursor-color "red")))
 
+(set-face-font 'default "Inconsolata-10")
+
 (global-set-key [M-kanji] 'ignore)
 (global-set-key (kbd "C-t") 'ignore)
 
-(setq howm-directory "~/../Dropbox/Application Data/howm/")
+(setq howm-directory "~/Dropbox/Application Data/howm/")
+
+(setenv "PATH"
+  (concat
+   "/cygwin/bin/" ";"
+   (getenv "PATH")))
+
+(require 'tramp)
+(setq tramp-default-method "sshx")
