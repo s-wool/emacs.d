@@ -10,13 +10,14 @@
 	(if (fboundp 'normal-top-level-add-subdirs-to-load-path)
 	    (normal-top-level-add-subdirs-to-load-path))))))
 ;; 引数のディレクトリとそのサブディレクトリをload-pathに追加
-(add-to-load-path "elisp" "conf" "public_repos")
+(add-to-load-path "elisp" "public_repos")
+(when (eq system-type 'darwin)
+  (load "~/.emacs.d/conf/mac.el"))
+(when (eq system-type 'windows-nt)
+  (load "~/.emacs.d/conf/win.el"))
 
 ;; backup
-(setq backup-direcotry-alist
-      `((".*" . ,temporary-file-directory)))
-(setq auto-save-file-name-transforms
-      `((".*" ,temporary-file-directory t)))
+(setq backup-directory-alist '(("" . "~/.emacs.d/backup")))
 (setq auto-save-timeout 15)
 (setq auto-save-interval 60)
 
@@ -35,8 +36,7 @@
     (auto-install-update-emacswiki-package-name t))
   (auto-install-compatibility-setup))
 
-;; 極力UTF-8
-(prefer-coding-system 'utf-8)
+
 ;;colors
 (require 'color-theme-tomorrow)
 (color-theme-initialize)
@@ -58,7 +58,7 @@
 ;;行数
 (require 'linum)
 (global-linum-mode t)
-(setq linum-format "%4d")  ;;4桁表示
+(setq linum-format "%4d ")  ;;4桁表示
 ;;スタートアップページいらない
 (setq inhibit-startup-message t)
 ;;hide toolbar
@@ -80,53 +80,6 @@
 (require 'minibuf-isearch nil t)
 ;; use space
 (setq-default indent-tabs-mode nil) 
-
-;; MacのEmacsでファイル名を正しく扱うための設定
-(require 'ucs-normalize)
-(setq file-name-coding-system 'utf-8-hfs)
-(setq locale-coding-system 'utf-8-hfs)
-
-;; Mac用(App版)
-(when (and (eq system-type 'darwin) (eq window-system 'ns))
-  ;; 日本語入力
-  (setq default-input-method "MacOSX")
-  ;; フォント
-  (create-fontset-from-ascii-font "DejaVu Sans Mono-12:weight=normal:slant=normal" nil "dejavukakugo")
-  (set-fontset-font "fontset-dejavukakugo"
-		    'unicode
-		    (font-spec :family "Hiragino Kaku Gothic ProN" :size 12)
-		    nil
-		    'append)
-  (add-to-list 'default-frame-alist '(font . "fontset-dejavukakugo")))
-
-;; Mac Clipboardとの共有
-(when (eq system-type 'darwin)
-  (defvar prev-yanked-text nil "*previous yanked text")
-  (setq interprogram-cut-function
-        (lambda (text &optional push)
-                                        ; use pipe
-          (with-temp-buffer (cd "/tmp")
-                            (let ((process-connection-type nil))
-                              (let ((proc (start-process "pbcopy" nil "pbcopy")))
-                                (process-send-string proc string)
-                                (process-send-eof proc)
-                                )))))
-  (setq interprogram-paste-function
-        (lambda ()
-          (with-temp-buffer (cd "/tmp")
-                            (let ((text (shell-command-to-string "pbpaste")))
-                              (if (string= prev-yanked-text text)
-                                  nil
-                                (setq prev-yanked-text text)))))))
-
-;; dash
-(when (eq system-type 'darwin)
-  (defun dash ()
-    (interactive)
-    (shell-command
-     (format "open dash://%s"
-	     (or (thing-at-point 'symbol) ""))))
-  (global-set-key "\C-cd" 'dash))
 
 ;; anything
 (require 'anything-startup)
@@ -251,8 +204,6 @@
             (setq c-basic-offset 4)))
 
 ;; howm
-(setq howm-directory "~/Dropbox/Application Data/howm/")
-;(setq howm-file-name-format "%Y/%m/%Y-%m-%d.howm")
 (setq howm-menu-lang 'ja)
 (setq howm-process-coding-system 'utf-8)
 (when (require 'howm-mode nil t)
@@ -266,11 +217,6 @@
     (save-buffer)
     (kill-buffer nil)))
 (define-key howm-mode-map (kbd "C-c C-c") 'howm-save-buffer-and-kill)
-
-(require 'tramp)
-(setq tramp-default-method "ssh")
-(add-to-list 'tramp-default-proxies-alist '("\\'" "\\`root\\'" "/ssh:%h:")) ;; 追加
-(add-to-list 'tramp-default-proxies-alist '("localhost\\'" "\\`root\\'" nil)) ;; 追加
 
 ;; perl
 (load-library "cperl-mode")
@@ -286,15 +232,3 @@
 (add-hook 'cperl-mode-hook
           '(lambda ()
                   (cperl-set-style "PerlStyle"))) 
-
-;; twittering-mode
-(require 'twittering-mode)
-
-;; dash
-(when (eq system-type 'darwin)
-  (autoload 'dash-at-point "dash-at-point"
-    "Search the word at point with Dash." t nil)
-  (global-set-key "\C-cd" 'dash-at-point))
-
-;; ag
-(require 'ag)

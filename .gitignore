@@ -6,3 +6,5 @@ history
 tramp
 *.elc
 url/cookies
+backup/*
+*~
