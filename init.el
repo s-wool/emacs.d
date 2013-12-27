@@ -17,9 +17,8 @@
   (load "~/.emacs.d/conf/win.el"))
 
 ;; backup
-(setq backup-directory-alist '(("" . "~/.emacs.d/backup")))
-(setq auto-save-timeout 15)
-(setq auto-save-interval 60)
+(setq make-backup-files nil)
+(setq auto-save-default nil)
 
 ;; package.el
 (when (require 'package nil t)
@@ -54,7 +53,7 @@
 ;;履歴を次回に保存する。
 (savehist-mode t)
 ;;; 最近開いたファイルを保存する数を増やす
-(setq recentf-max-saved-items 10000)
+(setq recentf-max-saved-items 1000)
 ;;行数
 (require 'linum)
 (global-linum-mode t)
@@ -75,11 +74,13 @@
 (setq visible-bell t)
 (setq ring-bell-function 'ignore)
 ;;ミニバッファ履歴リストの最大長：tなら無限
-(setq history-length t)
+(setq history-length 10000)
 ;;minibufでisearchを使えるようにする
 (require 'minibuf-isearch nil t)
 ;; use space
-(setq-default indent-tabs-mode nil) 
+(setq-default indent-tabs-mode nil)
+;; 変更のあったファイルの自動再読み込み
+(global-auto-revert-mode 1)
 
 ;; anything
 (require 'anything-startup)
@@ -135,7 +136,8 @@
                                       'ruby-mode
                                       'text-mode
                                       'fundamental-mode
-				      'smarty-mode))))
+                                      'smarty-mode
+                                      'cperl-mode))))
   (when (boundp 'jaspace-alternate-jaspace-string)
     (setq jaspace-alternate-jaspace-string "□"))
   (when (boundp 'jaspace-highlight-tabs)
@@ -174,10 +176,10 @@
                                      :strike-through nil
                                      :underline t))))))))
 
-;; redo+.el
-(when (require 'redo+ nil t)
-  (global-set-key (kbd "C-c '") 'redo))
-(setq undo-no-redo t)
+;; undo-tree
+(require 'undo-tree)
+(global-undo-tree-mode t)
+(global-set-key (kbd "M-/") 'undo-tree-redo)
 
 ;; php-mode
 (require 'php-mode)
@@ -231,4 +233,13 @@
     (add-to-list 'interpreter-mode-alist (cons interpreter 'cperl-mode))))
 (add-hook 'cperl-mode-hook
           '(lambda ()
-                  (cperl-set-style "PerlStyle"))) 
+             (cperl-set-style "PerlStyle")
+             (custom-set-variables
+              '(cperl-indent-parens-as-block t)
+              '(cperl-close-paren-offset -4)
+              '(cperl-indent-subs-specially nil))))
+
+;; cua-mode http://tech.kayac.com/archive/emacs-rectangle.html
+(cua-mode t)
+(setq cua-enable-cua-keys nil) ; そのままだと C-x が切り取りになってしまったりするので無効化
+(global-set-key (kbd "C-c C-u") 'cua-set-rectangle-mark) ; http://dev.ariel-networks.com/articles/emacs/part5/
