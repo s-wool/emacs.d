@@ -1,7 +1,7 @@
 ;;; howm-mode.el --- Wiki-like note-taking tool
-;;; Copyright (C) 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012
+;;; Copyright (C) 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013
 ;;;   HIRAOKA Kazuyuki <khi@users.sourceforge.jp>
-;;; $Id: howm-mode.el,v 1.316 2011-12-31 15:07:29 hira Exp $
+;;; $Id: howm-mode.el,v 1.318 2012-12-29 08:57:18 hira Exp $
 ;;;
 ;;; This program is free software; you can redistribute it and/or modify
 ;;; it under the terms of the GNU General Public License as published by
@@ -580,8 +580,8 @@ key	binding
           (p (cons nil (cdr p)))
           (t (cons old #'identity)))))
 
-(put 'howm-with-normalizer 'lisp-indent-hook 0)
 (defmacro howm-with-normalizer (&rest body)
+  (declare (indent 0))
   (let ((g (howm-cl-gensym)))
     `(progn
        (when (howm-normalize-oldp)
@@ -1005,16 +1005,15 @@ is necessary.")
   (setq keyword-list (if (stringp keyword-list)
                          (list keyword-list)
                        keyword-list))
-  (save-excursion
-    (set-buffer (howm-keyword-buffer))
-    (goto-char (point-max))
-    (mapc (lambda (k)
-            (when (howm-keyword-new-p k)
-              (insert k "\n")))
-          keyword-list)
-    (when (buffer-file-name)
-      (howm-basic-save-buffer))
-    ))
+  (with-current-buffer (howm-keyword-buffer)
+    (save-excursion
+      (goto-char (point-max))
+      (mapc (lambda (k)
+              (when (howm-keyword-new-p k)
+                (insert k "\n")))
+            keyword-list)
+      (when (buffer-file-name)
+        (howm-basic-save-buffer)))))
 
 (defun howm-keyword-new-p (str)
   (save-excursion
@@ -1211,6 +1210,15 @@ KEYWORD itself is always at the head of the returneded list.
           (setq keyword-list (cons key-str keyword-list))))
       (howm-keyword-add keyword-list)
       (message "%s" m))))
+(defun howm-keyword-add-items (items)
+  (let ((files (mapcar #'howm-view-item-filename items)))
+    (with-temp-buffer
+      (mapc (lambda (f)
+              (erase-buffer)
+              (insert-file-contents f)
+              (howm-set-configuration-for-file-name f)
+              (howm-keyword-add-current-buffer))
+            files))))
 
 (defun howm-keyword-read ()
   (let ((ks nil)

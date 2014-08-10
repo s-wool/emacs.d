@@ -1,3 +1,7 @@
+;; cask
+(require 'cask "~/.cask/cask.el")
+(cask-initialize)
+
 ;;load-path
 (add-to-list 'load-path "~/.emacs.d/elisp")
 ;; load-pathを追加する関数を定義
@@ -10,54 +14,46 @@
 	(if (fboundp 'normal-top-level-add-subdirs-to-load-path)
 	    (normal-top-level-add-subdirs-to-load-path))))))
 ;; 引数のディレクトリとそのサブディレクトリをload-pathに追加
-(add-to-load-path "elisp" "public_repos")
+(add-to-load-path "elsp" "conf")
+
+;; システム毎の設定
 (when (eq system-type 'darwin)
-  (load "~/.emacs.d/conf/mac.el"))
+  (load "~/.emacs.d/system_conf/mac.el"))
 (when (eq system-type 'windows-nt)
-  (load "~/.emacs.d/conf/win.el"))
+  (load "~/.emacs.d/system_conf/win.el"))
 
 ;; backup
-(setq make-backup-files nil)
-(setq auto-save-default nil)
+(setq backup-directory-alist '(("" . "~/.emacs.d/backup")))
 
-;; package.el
-(when (require 'package nil t)
-  (add-to-list 'package-archives
-	       '("marmalade" . "http://marmalade-repo.org/packages/"))
-  (add-to-list 'package-archives '("ELPA" . "http://tromey.com/elpa/"))
-  (package-initialize))
+;; 極力UTF-8
+(prefer-coding-system 'utf-8)
 
-;; auto-install
-(when (require 'auto-install nil t)
-  ;; auto-install directory
-  (setq auto-install-directory "~/.emacs.d/elisp/")
-  (ignore-errors
-    (auto-install-update-emacswiki-package-name t))
-  (auto-install-compatibility-setup))
-
-
-;;colors
-(require 'color-theme-tomorrow)
-(color-theme-initialize)
-(color-theme-tomorrow-night-bright)
-(if window-system (progn
-        ;;背景の透明度
-        (set-frame-parameter nil 'alpha 85)))
+;; color
+(add-to-list 'custom-theme-load-path
+             (file-name-as-directory "~/.emacs.d/elisp/themes/"))
+(load-theme 'clarity t t)
+(enable-theme 'clarity)
 
 ;;時計表示
 (display-time)
 ;;yesをyで答える
 (defalias 'yes-or-no-p 'y-or-n-p)
 ;;履歴を多めに保存。
-(setq history-length 10000)
+(setq history-length 1000)
 ;;履歴を次回に保存する。
 (savehist-mode t)
 ;;; 最近開いたファイルを保存する数を増やす
 (setq recentf-max-saved-items 1000)
 ;;行数
 (require 'linum)
-(global-linum-mode t)
-(setq linum-format "%4d ")  ;;4桁表示
+;; 行番号表示をトグル
+(defun toggle-linum-lines ()
+  "toggle display line number"
+  (interactive)
+  (setq linum-format "%4d ")
+  (linum-mode
+   (if linum-mode -1 1)))
+(define-key global-map (kbd "C-x C-l") 'toggle-linum-lines)
 ;;スタートアップページいらない
 (setq inhibit-startup-message t)
 ;;hide toolbar
@@ -73,16 +69,21 @@
 ;;ビープ音消去
 (setq visible-bell t)
 (setq ring-bell-function 'ignore)
-;;ミニバッファ履歴リストの最大長：tなら無限
-(setq history-length 10000)
 ;;minibufでisearchを使えるようにする
 (require 'minibuf-isearch nil t)
 ;; use space
 (setq-default indent-tabs-mode nil)
-;; 変更のあったファイルの自動再読み込み
-(global-auto-revert-mode 1)
 
-;; anything
+;; other window
+;; via: http://d.hatena.ne.jp/rubikitch/20100210/emacs
+(defun other-window-or-split ()
+  (interactive)
+  (when (one-window-p)
+    (split-window-horizontally))
+  (other-window 1))
+
+(global-set-key (kbd "C-]") 'other-window-or-split)
+
 (require 'anything-startup)
 (when (require 'anything nil t)
   (setq
@@ -113,19 +114,6 @@
 (global-auto-complete-mode t)
 (setq ac-auto-start t)
 
-;; other window
-;; via: http://d.hatena.ne.jp/rubikitch/20100210/emacs
-(defun other-window-or-split ()
-  (interactive)
-  (when (one-window-p)
-    (split-window-horizontally))
-  (other-window 1))
-
-(global-set-key (kbd "C-]") 'other-window-or-split)
-
-;; goto-line
-(global-set-key "\C-l" 'goto-line)
-
 ;; タブ, 全角スペース、改行直前の半角スペースを表示する
 (when (require 'jaspace nil t)
   (when (boundp 'jaspace-modes)
@@ -136,8 +124,7 @@
                                       'ruby-mode
                                       'text-mode
                                       'fundamental-mode
-                                      'smarty-mode
-                                      'cperl-mode))))
+				      'smarty-mode))))
   (when (boundp 'jaspace-alternate-jaspace-string)
     (setq jaspace-alternate-jaspace-string "□"))
   (when (boundp 'jaspace-highlight-tabs)
@@ -176,70 +163,10 @@
                                      :strike-through nil
                                      :underline t))))))))
 
-;; undo-tree
-(require 'undo-tree)
-(global-undo-tree-mode t)
-(global-set-key (kbd "M-/") 'undo-tree-redo)
+;; goto-line
+(global-set-key "\M-l" 'goto-line)
 
-;; php-mode
-(require 'php-mode)
-(autoload 'php-mode "php-mode")
-(setq auto-mode-alist
-      (cons '("\\.php\\'" . php-mode) auto-mode-alist))
-(setq php-mode-force-pear t)
-(add-hook 'php-mode-hook
-      (lambda ()
-        (c-set-offset 'arglist-intro '+)
-        (c-set-offset 'arglist-close 0)
-        (setq tab-width 4)
-        (setq c-basic-offset 4)
-        (setq indent-tabs-mode nil)
-        ))
-
-;; smarty
-;; http://deboutv.free.fr/lisp/smarty/download.php
-(add-to-list 'auto-mode-alist (cons "\\.tpl\\'" 'smarty-mode))
-(autoload 'smarty-mode "smarty-mode" "Smarty Mode" t)
-(add-hook 'smarty-mode-hook
-          (lambda ()
-            (setq tab-width 4)
-            (setq c-basic-offset 4)))
-
-;; howm
-(setq howm-menu-lang 'ja)
-(setq howm-process-coding-system 'utf-8)
-(when (require 'howm-mode nil t)
-  (define-key global-map (kbd "C-c ,,") 'howm-menu))
-;; save and close howm
-(defun howm-save-buffer-and-kill ()
-  "close howm"
-  (interactive)
-  (when (and (buffer-file-name)
-	     (string-match "\\.txt" (buffer-file-name)))
-    (save-buffer)
-    (kill-buffer nil)))
-(define-key howm-mode-map (kbd "C-c C-c") 'howm-save-buffer-and-kill)
-
-;; perl
-(load-library "cperl-mode")
-(add-to-list 'auto-mode-alist '("\\.[Pp][LlMms][Ccg]?[i]?$" . cperl-mode))
-(add-to-list 'auto-mode-alist '("\\.t$" . cperl-mode))
-(while (let ((orig (rassoc 'perl-mode auto-mode-alist)))
-	 (if orig (setcdr orig 'cperl-mode))))
-(while (let ((orig (rassoc 'perl-mode interpreter-mode-alist)))
-	 (if orig (setcdr orig 'cperl-mode))))
-(dolist (interpreter '("perl" "perl5" "miniperl" "pugs"))
-  (unless (assoc interpreter interpreter-mode-alist)
-    (add-to-list 'interpreter-mode-alist (cons interpreter 'cperl-mode))))
-(add-hook 'cperl-mode-hook
-          '(lambda ()
-             (cperl-set-style "PerlStyle")
-             (custom-set-variables
-              '(cperl-indent-parens-as-block t)
-              '(cperl-close-paren-offset -4)
-              '(cperl-indent-subs-specially nil))))
-
-;; cua-mode http://tech.kayac.com/archive/emacs-rectangle.html
-(cua-mode t)
-(setq cua-enable-cua-keys nil) ; そのままだと C-x が切り取りになってしまったりするので無効化
-(global-set-key (kbd "C-c C-u") 'cua-set-rectangle-mark) ; http://dev.ariel-networks.com/articles/emacs/part5/
+;; redo+.el
+(when (require 'redo+ nil t)
+  (global-set-key (kbd "C-c '") 'redo))
+(setq undo-no-redo t)
