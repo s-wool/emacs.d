@@ -19,8 +19,10 @@
 ;; システム毎の設定
 (when (eq system-type 'darwin)
   (load "~/.emacs.d/system_conf/mac.el"))
-(when (eq system-type 'windows-nt)
-  (load "~/.emacs.d/system_conf/win.el"))
+;; (when (eq system-type 'windows-nt)
+;;   (load "~/.emacs.d/system_conf/win.el"))
+(when (eq system-type 'cygwin)
+  (load "~/.emacs.d/system_conf/cygwin.el"))
 
 ;; backup
 (setq backup-directory-alist '(("" . "~/.emacs.d/backup")))

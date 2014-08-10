@@ -7,7 +7,7 @@ tramp
 *.elc
 url/cookies
 backup/*
-!backup/*
+!backup
 !backup/.gitkeep
 .cask/*
 !.cask
