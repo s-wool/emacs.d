@@ -35,6 +35,6 @@
 (define-key howm-mode-map (kbd "C-c C-c") 'howm-save-buffer-and-kill)
 
 (require 'tramp)
-(setq tramp-default-method "ssh")
-(add-to-list 'tramp-default-proxies-alist '("\\'" "\\`root\\'" "/ssh:%h:"))
+(setq tramp-default-method "sshx")
+(add-to-list 'tramp-default-proxies-alist '("\\'" "\\`root\\'" "/sshx:%h:"))
 (add-to-list 'tramp-default-proxies-alist '("localhost\\'" "\\`root\\'" nil))
