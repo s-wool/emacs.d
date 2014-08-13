@@ -13,4 +13,4 @@ backup/*
 !.cask
 !.cask/.gitkeep
 system_conf/local.el
-
+.scratch
