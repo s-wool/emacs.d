@@ -229,6 +229,6 @@
 (setq recentf-auto-cleanup 'never)
 
 ;;使わない（tmuxと競合する）
-(global-unset-key "C-t")
+(global-unset-key "\C-t")
 
 (read-scratch-data)    ;; ←これは初期設定ファイルの最後に追加
