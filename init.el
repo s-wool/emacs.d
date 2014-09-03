@@ -116,6 +116,25 @@
 (global-auto-complete-mode t)
 (setq ac-auto-start t)
 
+;; perl
+(load-library "cperl-mode")
+(add-to-list 'auto-mode-alist '("\\.[Pp][LlMms][Ccg]?[i]?$" . cperl-mode))
+(add-to-list 'auto-mode-alist '("\\.t$" . cperl-mode))
+(while (let ((orig (rassoc 'perl-mode auto-mode-alist)))
+	 (if orig (setcdr orig 'cperl-mode))))
+(while (let ((orig (rassoc 'perl-mode interpreter-mode-alist)))
+	 (if orig (setcdr orig 'cperl-mode))))
+(dolist (interpreter '("perl" "perl5" "miniperl" "pugs"))
+  (unless (assoc interpreter interpreter-mode-alist)
+    (add-to-list 'interpreter-mode-alist (cons interpreter 'cperl-mode))))
+(add-hook 'cperl-mode-hook
+          '(lambda ()
+             (cperl-set-style "PerlStyle")
+             (custom-set-variables
+              '(cperl-indent-parens-as-block t)
+              '(cperl-close-paren-offset -4)
+              '(cperl-indent-subs-specially nil))))
+
 ;; タブ, 全角スペース、改行直前の半角スペースを表示する
 (when (require 'jaspace nil t)
   (when (boundp 'jaspace-modes)
@@ -126,7 +145,8 @@
                                       'ruby-mode
                                       'text-mode
                                       'fundamental-mode
-				      'smarty-mode))))
+				      'smarty-mode
+                                      'cperl-mode))))
   (when (boundp 'jaspace-alternate-jaspace-string)
     (setq jaspace-alternate-jaspace-string "□"))
   (when (boundp 'jaspace-highlight-tabs)
@@ -173,6 +193,11 @@
   (global-set-key (kbd "C-c '") 'redo))
 (setq undo-no-redo t)
 
+;; cua-mode http://tech.kayac.com/archive/emacs-rectangle.html
+(cua-mode t)
+(setq cua-enable-cua-keys nil) ; そのままだと C-x が切り取りになってしまったりするので無効化
+(global-set-key (kbd "C-c C-u") 'cua-set-rectangle-mark) ; http://dev.ariel-networks.com/articles/emacs/part5/
+
 ;;; auto save and restore scratch buffer
 (defun save-scratch-data ()
   (let ((str (progn
@@ -202,5 +227,8 @@
     ))
 
 (setq recentf-auto-cleanup 'never)
+
+;;使わない（tmuxと競合する）
+(global-unset-key "C-t")
 
 (read-scratch-data)    ;; ←これは初期設定ファイルの最後に追加
