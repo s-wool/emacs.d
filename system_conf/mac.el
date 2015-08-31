@@ -5,8 +5,8 @@
                                         ; use pipe
         (with-temp-buffer (cd "/tmp")
                           (let ((process-connection-type nil))
-                            (let ((proc (start-process "pbcopy" nil "pbcopy")))
-                              (process-send-string proc string)
+                            (let ((proc (start-process "pbcopy" "*Messages*" "pbcopy")))
+                              (process-send-string proc text)
                               (process-send-eof proc)
                               )))))
 (setq interprogram-paste-function
@@ -35,6 +35,7 @@
 (define-key howm-mode-map (kbd "C-c C-c") 'howm-save-buffer-and-kill)
 
 (require 'tramp)
-(setq tramp-default-method "sshx")
+(setq tramp-shell-prompt-pattern "^.*[#$%>] *")
+(setq tramp-default-method "scp")
 (add-to-list 'tramp-default-proxies-alist '("\\'" "\\`root\\'" "/sshx:%h:"))
 (add-to-list 'tramp-default-proxies-alist '("localhost\\'" "\\`root\\'" nil))
