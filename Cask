@@ -35,3 +35,6 @@
 (depends-on "color-theme")
 (depends-on "redo+")
 (depends-on "ag")
+(depends-on "magit")
+(depends-on "puppet-mode")
+(depends-on "ack")

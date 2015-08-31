@@ -231,4 +231,10 @@
 ;;使わない（tmuxと競合する）
 (global-unset-key "\C-t")
 
+(require 'magit)
+(setq magit-auto-revert-mode nil)
+(setq magit-last-seen-setup-instructions "1.4.0")
+
+(setq puppet-indent-level 4)
+
 (read-scratch-data)    ;; ←これは初期設定ファイルの最後に追加
