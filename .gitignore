@@ -14,3 +14,4 @@ backup/*
 !.cask/.gitkeep
 system_conf/local.el
 .scratch
+recentf
