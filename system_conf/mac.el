@@ -39,3 +39,6 @@
 (setq tramp-default-method "scp")
 (add-to-list 'tramp-default-proxies-alist '("\\'" "\\`root\\'" "/sshx:%h:"))
 (add-to-list 'tramp-default-proxies-alist '("localhost\\'" "\\`root\\'" nil))
+(setq tramp-debug-buffer t tramp-verbose 10)
+(defadvice tramp-handle-vc-registered (around tramp-handle-vc-registered-around activate)
+  (let ((vc-handled-backends '(SVN Git))) ad-do-it))
