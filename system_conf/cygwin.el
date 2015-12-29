@@ -15,27 +15,27 @@
     (kill-buffer nil)))
 (define-key howm-mode-map (kbd "C-c C-c") 'howm-save-buffer-and-kill)
 
-(setq tramp-default-method "plink")
-
-(defvar prev-yanked-text nil "*previous yanked text")
 (setq interprogram-cut-function
       (lambda (text &optional push)
-        (with-temp-buffer (cd "/tmp")
-                          (let ((process-connection-type nil))
-                            (let ((proc (start-process "putclip" nil "putclip")))
-                              (process-send-string proc string)
-                              (process-send-eof proc)
-                              )))))
+        (let ((process-connection-type nil))
+          (let ((proc (start-process "putclip" "*Messages*" "putclip")))
+            (process-send-string proc text)
+            (process-send-eof proc)))))
 (setq interprogram-paste-function
-      (lambda ()
-        (with-temp-buffer (cd "/tmp")
-                          (let ((text (shell-command-to-string "getclip")))
-                            (if (string= prev-yanked-text text)
-                                nil
-                              (setq prev-yanked-text text))))))
+       (lambda ()
+         (shell-command-to-string "getclip")))
+
+;; (defun copy-from-system ()
+;;   (shell-command-to-string "getclip"))
+
+;; (defun paste-to-system (text &optional push)
+;;   )
+
+;; (setq interprogram-cut-function 'paste-to-system)
+;; (setq interprogram-paste-function 'copy-from-system)
 
 ;; tramp
 (require 'tramp)
-(setq tramp-default-method "ssh")
+(setq tramp-default-method "scp")
 (add-to-list 'tramp-default-proxies-alist '("\\'" "\\`root\\'" "/ssh:%h:"))
 (add-to-list 'tramp-default-proxies-alist '("localhost\\'" "\\`root\\'" nil))
