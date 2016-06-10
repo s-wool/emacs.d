@@ -236,5 +236,15 @@
 (setq magit-last-seen-setup-instructions "1.4.0")
 
 (setq puppet-indent-level 4)
+(add-hook 'json-mode-hook
+          (lambda ()
+            (make-local-variable 'js-indent-level)
+            (setq js-indent-level 2)))
+
+(add-to-list 'auto-mode-alist '("\\.go$" . go-mode))
+(add-hook 'before-save-hook 'gofmt-before-save)
+(require 'yaml-mode)
+(add-to-list 'auto-mode-alist '("\\.yml\\'" . yaml-mode))
+(add-to-list 'auto-mode-alist '("\\.yaml\\'" . yaml-mode))
 
 (read-scratch-data)    ;; ←これは初期設定ファイルの最後に追加

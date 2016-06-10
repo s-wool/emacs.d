@@ -38,3 +38,6 @@
 (depends-on "magit")
 (depends-on "puppet-mode")
 (depends-on "ack")
+(depends-on "json-mode")
+(depends-on "go-mode")
+(depends-on "yaml-mode")
