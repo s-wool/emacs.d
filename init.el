@@ -240,6 +240,7 @@
           (lambda ()
             (make-local-variable 'js-indent-level)
             (setq js-indent-level 2)))
+(setq js-indent-level 2)
 
 (add-to-list 'auto-mode-alist '("\\.go$" . go-mode))
 (add-hook 'before-save-hook 'gofmt-before-save)
