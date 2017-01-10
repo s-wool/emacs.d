@@ -41,3 +41,4 @@
 (depends-on "json-mode")
 (depends-on "go-mode")
 (depends-on "yaml-mode")
+(depends-on "helm-ghq")
